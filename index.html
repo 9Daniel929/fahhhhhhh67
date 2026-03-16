@@ -4,13 +4,26 @@
 <meta charset="UTF-8">
 <title>Three Scene</title>
 <style>
-body{
-  margin:0;
-  overflow:hidden;
-}
+  body{ margin:0; overflow:hidden; font-family: sans-serif; }
+  /* Overlay Styles */
+  #overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 10;
+  }
+  #playBtn {
+    padding: 15px 30px; font-size: 20px; cursor: pointer;
+    background: #fff; border: none; border-radius: 5px; font-weight: bold;
+  }
 </style>
 </head>
 <body>
+
+<div id="overlay">
+  <button id="playBtn">PLAY</button>
+</div>
 
 <script type="module">
 
@@ -25,7 +38,7 @@ const camera = new THREE.PerspectiveCamera(
   10000000000
 );
 
-camera.position.set(1.3257474773333948,4.085757118896425,8.908145984535496);
+camera.position.set(1.3257474773333948, 4.085757118896425, 8.908145984535496);
 
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth,window.innerHeight);
@@ -35,21 +48,17 @@ renderer.shadowMap.enabled = true;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1;
 
-
-
 // geometries
 const geo1 = new THREE.BoxGeometry(1,1,1);
 const geo2 = new THREE.BoxGeometry(1,1,1);
 const geo3 = new THREE.BoxGeometry(1,1,1);
 const geo4 = new THREE.BoxGeometry(1,1,1);
 
-
 // materials
 const mat1 = new THREE.MeshStandardMaterial({color:0xffffff});
 const mat2 = new THREE.MeshStandardMaterial({color:0xffffff});
 const mat3 = new THREE.MeshStandardMaterial({color:0xffffff});
 const mat4 = new THREE.MeshStandardMaterial({color:0xffffff});
-
 
 // meshes
 const floor = new THREE.Mesh(geo1,mat1);
@@ -61,7 +70,6 @@ box2.position.set(0,3.7216049196755128,0);
 
 const box3 = new THREE.Mesh(geo3,mat3);
 box3.position.set(0,2.770081741401227,0);
-
 
 function smallBox(x,y){
   const m = new THREE.Mesh(geo4,mat4);
@@ -79,7 +87,6 @@ smallBox(0.21229651993020027,1.7761159613843853);
 smallBox(0.6806725058896312,2.749653517782651);
 smallBox(-0.6396941602799919,2.749653517782651);
 
-
 // lighting
 const light = new THREE.DirectionalLight(0xffffff,1);
 light.position.set(5,10,5);
@@ -88,6 +95,25 @@ scene.add(light);
 const ambient = new THREE.AmbientLight(0xffffff,0.5);
 scene.add(ambient);
 
+// --- MOVEMENT LOGIC ---
+let isPlaying = false;
+const moveSpeed = 0.1;
+
+document.getElementById('playBtn').addEventListener('click', () => {
+  document.getElementById('overlay').style.display = 'none';
+  isPlaying = true;
+});
+
+window.addEventListener("keydown", (e) => {
+  if (!isPlaying) return;
+
+  const key = e.key.toLowerCase();
+  if (key === 'w') camera.position.z -= moveSpeed; // Forward
+  if (key === 's') camera.position.z += moveSpeed; // Back
+  if (key === 'a') camera.position.x -= moveSpeed; // Left
+  if (key === 'd') camera.position.x += moveSpeed; // Right
+  if (e.key === 'ArrowUp') camera.position.y += moveSpeed; // Up
+});
 
 // resize fix
 window.addEventListener("resize",()=>{
@@ -95,7 +121,6 @@ window.addEventListener("resize",()=>{
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth,window.innerHeight);
 });
-
 
 // render loop
 function animate(){
